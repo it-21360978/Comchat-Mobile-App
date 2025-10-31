@@ -1,4 +1,4 @@
-import { getMessages, createMessage } from '../models/messageModel.js';
+import { getMessages, createMessage  } from '../models/messageModel.js';
 
 
 // Fetch recent messages
@@ -29,3 +29,4 @@ export const postMessage = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+

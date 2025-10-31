@@ -1,36 +1,51 @@
-import React, { useState } from "react";
-import { View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import React from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-export default function MessageInput({ onSend }) {
-  const [message, setMessage] = useState("");
-
-  const handleSend = () => {
-    if (message.trim().length > 0) {
-      onSend(message);
-      setMessage("");
-    }
-  };
-
+export default function MessageInput({
+  value,
+  onChangeText,
+  onSend,
+  loading = false,
+  disabled = false,
+}) {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="bg-transparent border-t border-gray-100 px-4 py-3"
-    >
+    <View className="bg-gray-200 border-t border-gray-100 px-5 py-6 pb-20 ">
       <View className="flex-row items-center">
-        <View className="flex-1 bg-gray-100 rounded-2xl px-4 py-6 mr-3">
+        <View className="flex-1 bg-gray-50 rounded-2xl px-5 py-4 border border-gray-200 mb-4">
+          {/* Text input field */}
           <TextInput
             className="text-gray-800"
-            placeholder="Text here……"
+            placeholder="Type a message…"
             placeholderTextColor="#aaa"
-            value={message}
-            onChangeText={setMessage}
+            value={value}
+            onChangeText={onChangeText}
+            editable={!loading && !disabled}
           />
         </View>
-        <TouchableOpacity onPress={handleSend}>
-          <Ionicons name="send" size={46} color="#0891b2" />
+
+        {/* Send button */}
+        <TouchableOpacity
+          onPress={onSend}
+          disabled={loading || disabled}
+          className="ml-3 mb-3"
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#0891b2" />
+          ) : (
+            <Ionicons
+              name="send"
+              size={40}
+              color={disabled ? "#94a3b8" : "#0891b2"}
+            />
+          )}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
