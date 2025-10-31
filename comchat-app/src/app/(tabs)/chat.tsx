@@ -1,158 +1,238 @@
-// import React, { useState, useRef, useEffect } from "react";
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   ScrollView,
-//   KeyboardAvoidingView,
-//   Platform,
-// } from "react-native";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import { Ionicons } from "@expo/vector-icons";
 
-// export default function Chat() {
+// import React, { useState } from "react";
+// import { View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+// import { useSafeAreaInsets } from "react-native-safe-area-context";
+// import ChatHeader from "@/components/ChatHeader";
+// import MessageBubble from "@/components/MessageBubble";
+// import MessageInput from "@/components/MessageInput";
+
+// export default function Chat({ navigation }) {
+//   const insets = useSafeAreaInsets();
 //   const [messages, setMessages] = useState([
-//     { id: 1, text: "Good morning, hello?", sender: "other" },
-//     { id: 2, text: "hello....", sender: "me" },
-//     { id: 3, text: "Good morning, hello?", sender: "other" },
-//     { id: 4, text: "hello....", sender: "me" },
+//     { id: 1, text: "Good morning, hello?", isSender: false },
+//     { id: 2, text: "hello....", isSender: true },
+//     { id: 3, text: "Good morning, hello?", isSender: false },
+//     { id: 4, text: "hello....", isSender: true },
 //   ]);
-//   const [input, setInput] = useState("");
-//   const scrollViewRef = useRef(null);
 
-//   const sendMessage = () => {
-//     if (input.trim().length === 0) return;
-//     setMessages([...messages, { id: Date.now(), text: input, sender: "me" }]);
-//     setInput("");
+//   const handleSend = (msg) => {
+//     setMessages([...messages, { id: Date.now(), text: msg, isSender: true }]);
 //   };
 
-//   useEffect(() => {
-//     scrollViewRef.current?.scrollToEnd({ animated: true });
-//   }, [messages]);
-
 //   return (
-//     <SafeAreaView className="flex-1 bg-white">
+//     <View className="flex-1 bg-cyan-50" >
 //       <KeyboardAvoidingView
+//         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 //         className="flex-1"
-//         behavior={Platform.OS === "ios" ? "padding" : "height"}
-//         keyboardVerticalOffset={90}
 //       >
 //         {/* Header */}
-//         <View className="flex-row items-center px-4 pt-4 pb-3 border-b border-gray-100">
-//           <TouchableOpacity className="w-10 h-10 bg-cyan-100 rounded-full items-center justify-center">
-//             <Ionicons name="chevron-back" size={22} color="#0891b2" />
-//           </TouchableOpacity>
-//           <Text className="text-xl font-semibold text-gray-900 ml-3">
-//             Gihan Sera
-//           </Text>
-//         </View>
+//         <ChatHeader username="Gihan Sera" onBack={() => navigation.goBack()} />
 
-//         {/* Chat Body */}
+//         {/* Messages */}
 //         <ScrollView
-//           ref={scrollViewRef}
-//           className="flex-1 bg-cyan-50 px-4 py-3"
-//           contentContainerStyle={{ paddingBottom: 100 }}
+//           className="flex-1 px-4"
+//           contentContainerStyle={{ 
+//             paddingBottom: 90, // Adequate space for input
+//             paddingTop: 8 
+//           }}
+//           showsVerticalScrollIndicator={false}
 //         >
-//           {messages.map((msg) => (
-//             <View
-//               key={msg.id}
-//               className={`max-w-[75%] p-3 mb-3 rounded-2xl ${
-//                 msg.sender === "me"
-//                   ? "bg-cyan-600 self-end rounded-tr-none"
-//                   : "bg-cyan-200 self-start rounded-tl-none"
-//               }`}
-//             >
-//               <Text
-//                 className={`text-base ${
-//                   msg.sender === "me" ? "text-white" : "text-gray-800"
-//                 }`}
-//               >
-//                 {msg.text}
-//               </Text>
-//             </View>
+//           {messages.map((m) => (
+//             <MessageBubble key={m.id} text={m.text} isSender={m.isSender} />
 //           ))}
 //         </ScrollView>
 
 //         {/* Message Input */}
-//         <View className="flex-row items-center bg-white px-4 py-3 border-t border-gray-100">
-//           <View className="flex-1 bg-gray-100 rounded-full px-4 py-2 mr-3">
-//             <TextInput
-//               className="text-gray-800"
-//               placeholder="Text here……"
-//               placeholderTextColor="#aaa"
-//               value={input}
-//               onChangeText={setInput}
-//             />
-//           </View>
-//           <TouchableOpacity onPress={sendMessage}>
-//             <Ionicons name="send" size={30} color="#0891b2" />
-//           </TouchableOpacity>
+//         <View 
+//           className=" bg-transparent border-t border-gray-200"
+//           style={{ paddingBottom:30 }}
+//         >
+//           <MessageInput onSend={handleSend} />
 //         </View>
 //       </KeyboardAvoidingView>
-//     </SafeAreaView>
+//     </View>
 //   );
 // }
 
 
 
 
-import React, { useState } from "react";
-import { View, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+} from "react-native";
+import { useSelector } from "react-redux";
 import ChatHeader from "@/components/ChatHeader";
-import MessageBubble from "@/components/MessageBubble";
 import MessageInput from "@/components/MessageInput";
+import MessageBubble from "@/components/MessageBubble";
+import { useRealtime } from "@/hooks/useRealtime";
+import { useSendPublicMessage } from "@/hooks/useSendPublicMessage";
+import { ImageBackground } from "react-native";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import Toast from "react-native-toast-message";
 
-export default function Chat({ navigation }) {
-  const insets = useSafeAreaInsets();
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Good morning, hello?", isSender: false },
-    { id: 2, text: "hello....", isSender: true },
-    { id: 3, text: "Good morning, hello?", isSender: false },
-    { id: 4, text: "hello....", isSender: true },
-  ]);
+export default function Chat() {
+  const scrollRef = useRef<ScrollView>(null);
+  const user = useSelector((state: any) => state.user?.user); //log user
+  const myUserId = user?.id;
+  const myUserName = user?.name;
 
-  const handleSend = (msg) => {
-    setMessages([...messages, { id: Date.now(), text: msg, isSender: true }]);
+  useRealtime(myUserId); // real-time updates
+
+  const messages =
+    useSelector((state: any) => state.messages.rooms?.["public"]) || []; // msgs
+
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [queue, setQueue] = useState<any[]>([]); // offline messages queue
+
+  // hook
+  const sendMessage = useSendPublicMessage(myUserId, myUserName);
+  const isOnline = useNetworkStatus(); // network status
+
+  // Auto-scroll
+  useEffect(() => {
+    const timeout = setTimeout(
+      () => scrollRef.current?.scrollToEnd({ animated: true }),
+      100
+    );
+    return () => clearTimeout(timeout);
+  }, [messages]);
+
+  // // Handle sending msg
+  // const handleSend = async () => {
+  //   if (!text.trim() || loading) return;
+  //   setLoading(true);
+  //   try {
+  //     await sendMessage(text);
+  //     setText("");
+  //   } catch (err) {
+  //     console.error("Failed to send message:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // Send  queued msgs for back
+  useEffect(() => {
+    if (isOnline && queue.length > 0) {
+      queue.forEach(async (msg) => {
+        try {
+          await sendMessage(msg.text);
+        } catch (err) {
+          console.error("Failed sending queued message:", err);
+        }
+      });
+      setQueue([]); // clear queue
+      Toast.show({
+        type: "success",
+        text1: "Back online",
+        text2: "Queued messages sent",
+      });
+    }
+  }, [isOnline]);
+
+  // Handle sending msg
+  const handleSend = async () => {
+    if (!text.trim() || loading) return;
+
+    const message = { text, id: Date.now() }; // temp id
+
+    if (!isOnline) {
+      // offline
+      setQueue((prev) => [...prev, message]);
+      Toast.show({
+        type: "error",
+        text1: "You are offline",
+        text2: "Message queued and will send when back online",
+      });
+      setText("");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendMessage(text);
+      setText("");
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View className="flex-1 bg-cyan-50" >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
-        {/* Header */}
-        <ChatHeader username="Gihan Sera" onBack={() => navigation.goBack()} />
+    <View className="flex-1 bg-cyan-50">
+      {/* Header */}
+      <ChatHeader />
 
-        {/* Messages */}
+      {/* Chat background & scroll */}
+      <ImageBackground
+        source={require("@/assets/images/wallpaper.png")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+      >
         <ScrollView
-          className="flex-1 px-4"
-          contentContainerStyle={{ 
-            paddingBottom: 90, // Adequate space for input
-            paddingTop: 8 
-          }}
+          ref={scrollRef}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          {messages.map((m) => (
-            <MessageBubble key={m.id} text={m.text} isSender={m.isSender} />
+          {messages.map((m: any) => (
+            <MessageBubble
+              key={m.id}
+              message={m}
+              isSender={m.user_id === myUserId}
+            />
           ))}
         </ScrollView>
+      </ImageBackground>
 
-        {/* Message Input */}
-        <View 
-          className=" bg-transparent border-t border-gray-200"
-          style={{ paddingBottom:30 }}
-        >
-          <MessageInput onSend={handleSend} />
-        </View>
+      {/* Fixed input */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 5 : 0}
+      >
+        <MessageInput value={text} onChangeText={setText} onSend={handleSend} />
       </KeyboardAvoidingView>
+
+      {/* spinner  */}
+      {queue.length > 0 && (
+        <View
+          pointerEvents="box-none"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.2)",
+            zIndex: 10,
+          }}
+        >
+          <View className="p-4 bg-yellow-200 rounded-lg flex-row items-center">
+            <ActivityIndicator
+              size="large"
+              color={'#0891b2'}
+              style={{ transform: [{ scale: 2 }] }} 
+            />
+          </View>
+        </View>
+      )}
+
+      <Toast />
     </View>
   );
 }
 
-
-
-
-
+// Hide tab bar
+export const unstable_settings = {
+  tabBarStyle: { display: "none" },
+};

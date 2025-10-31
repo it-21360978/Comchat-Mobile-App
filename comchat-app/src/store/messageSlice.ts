@@ -1,31 +1,39 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Message } from '../types';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Message } from "@/types";
 
-interface MessageState {
-  messages: Message[];
-  loading: boolean;
+interface MessagesState {
+  rooms: {
+    [roomName: string]: Message[];
+  };
 }
 
-const initialState: MessageState = {
-  messages: [],
-  loading: false,
+const initialState: MessagesState = {
+  // Messages room
+  rooms: {
+    public: [],
+  },
 };
 
-const messageSlice = createSlice({
-  name: 'messages',
+const messagesSlice = createSlice({
+  // Slice message
+  name: "messages",
   initialState,
   reducers: {
-    setMessages: (state, action: PayloadAction<Message[]>) => {
-      state.messages = action.payload;
+    addMessage: (
+      state,
+      action: PayloadAction<{ room: string; message: Message }>
+    ) => {
+      // Add msg
+      const { room, message } = action.payload;
+      if (!state.rooms[room]) state.rooms[room] = [];
+      state.rooms[room].push(message);
     },
-    addMessage: (state, action: PayloadAction<Message>) => {
-      state.messages.unshift(action.payload);
-    },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
+    clearRoom: (state, action: PayloadAction<{ room: string }>) => {
+      state.rooms[action.payload.room] = [];
     },
   },
 });
 
-export const { setMessages, addMessage, setLoading } = messageSlice.actions;
-export default messageSlice.reducer;
+export const { addMessage, clearRoom } = messagesSlice.actions;
+export default messagesSlice.reducer;
+

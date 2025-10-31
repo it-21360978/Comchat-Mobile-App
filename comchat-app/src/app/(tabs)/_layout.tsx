@@ -17,6 +17,7 @@
 //           borderWidth: 1,
 //           paddingTop: 4,
 //           position: "absolute",
+        
 //         },
 //         tabBarActiveTintColor:  '#0891b2',
 //         tabBarInactiveTintColor: "#0891b2",
