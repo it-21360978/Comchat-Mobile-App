@@ -75,7 +75,7 @@ npx expo start
 ---
 
 ## 🎥 Demo
-Demo Video - [Add Link Here](https://drive.google.com/file/d/1lkuLgbMjpU1Z2Pg6mCZ9GntJ2--klL3T/view?usp=sharing)
+Demo Video - [Click Here](https://drive.google.com/file/d/1lkuLgbMjpU1Z2Pg6mCZ9GntJ2--klL3T/view?usp=sharing)
 
 ---
 
